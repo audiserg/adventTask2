@@ -14,20 +14,22 @@ class ChatInitial extends ChatState {
 
 class ChatLoading extends ChatState {
   final List<Message> messages;
+  final String? currentTopic;
 
-  const ChatLoading(this.messages);
+  const ChatLoading(this.messages, {this.currentTopic});
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [messages, currentTopic];
 }
 
 class ChatLoaded extends ChatState {
   final List<Message> messages;
+  final String? currentTopic;
 
-  const ChatLoaded(this.messages);
+  const ChatLoaded(this.messages, {this.currentTopic});
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [messages, currentTopic];
 }
 
 class ChatError extends ChatState {

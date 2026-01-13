@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Диалог с Жванецким',
+      title: 'Детектор эмоций',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -48,7 +48,17 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Диалог с Жванецким'),
+        title: BlocBuilder<ChatBloc, ChatState>(
+          builder: (context, state) {
+            String title = 'Детектор эмоций';
+            if (state is ChatLoaded && state.currentTopic != null) {
+              title = state.currentTopic!;
+            } else if (state is ChatLoading && state.currentTopic != null) {
+              title = state.currentTopic!;
+            }
+            return Text(title);
+          },
+        ),
         centerTitle: true,
         actions: [
           BlocBuilder<ChatBloc, ChatState>(

@@ -11,51 +11,172 @@ class ChatMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAiMessage = !message.isUser;
+    final hasEmotion = message.emotion != null;
+    
+    // Отладочный вывод
+    if (isAiMessage) {
+      print('=== WIDGET DEBUG ===');
+      print('isAiMessage: $isAiMessage');
+      print('hasEmotion: $hasEmotion');
+      print('emotion value: ${message.emotion}');
+      print('emotion type: ${message.emotion.runtimeType}');
+      print('message.topic: ${message.topic}');
+      print('message.body: ${message.body?.substring(0, message.body!.length > 50 ? 50 : message.body!.length)}...');
+      print('===================');
+    }
+    
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: message.isUser
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(18),
-        ),
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message.text,
-              style: TextStyle(
-                color: message.isUser
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Цветная полоска и смайлик для AI сообщений
+              // Показываем всегда для AI сообщений, даже если emotion null (для отладки)
+              if (isAiMessage) ...[
+                Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: hasEmotion 
+                        ? _getEmotionColor(message.emotion!)
+                        : Colors.grey, // Серый цвет для отладки, если emotion null
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(18),
+                      bottomLeft: Radius.circular(18),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    hasEmotion 
+                        ? _getEmotionEmoji(message.emotion!)
+                        : '❓', // Вопросительный знак для отладки
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              // Основной контейнер с сообщением
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: message.isUser
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        // Для AI сообщений показываем только body (распарсенное), для пользователя - text
+                        message.isUser 
+                            ? message.text 
+                            : (message.body ?? 'Ответ получен, но не удалось распарсить формат'),
+                        style: TextStyle(
+                          color: message.isUser
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatTime(message.timestamp),
+                            style: TextStyle(
+                              color: message.isUser
+                                  ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)
+                                  : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                              fontSize: 11,
+                            ),
+                          ),
+                          // Иконка info для AI сообщений
+                          if (isAiMessage)
+                            InkWell(
+                              onTap: () => _showOriginalResponse(context),
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 16,
+                                color: message.isUser
+                                    ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)
+                                    : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _formatTime(message.timestamp),
-              style: TextStyle(
-                color: message.isUser
-                    ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.7)
-                    : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
-                fontSize: 11,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Color _getEmotionColor(Emotion emotion) {
+    switch (emotion) {
+      case Emotion.green:
+        return Colors.green;
+      case Emotion.blue:
+        return Colors.blue;
+      case Emotion.red:
+        return Colors.red;
+    }
+  }
+
+  String _getEmotionEmoji(Emotion emotion) {
+    switch (emotion) {
+      case Emotion.green:
+        return '😊';
+      case Emotion.blue:
+        return '😐';
+      case Emotion.red:
+        return '😔';
+    }
   }
 
   String _formatTime(DateTime timestamp) {
     final hour = timestamp.hour.toString().padLeft(2, '0');
     final minute = timestamp.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  void _showOriginalResponse(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Исходный ответ от модели'),
+          content: SingleChildScrollView(
+            child: SelectableText(
+              message.text,
+              style: const TextStyle(fontSize: 14, fontFamily: 'monospace'),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

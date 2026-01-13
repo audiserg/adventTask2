@@ -1,5 +1,5 @@
 name: advent_task1
-description: "Диалог с Жванецким - чат с ИИ в стиле сатирика"
+description: "Детектор эмоций"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

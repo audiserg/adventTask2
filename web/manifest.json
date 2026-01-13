@@ -1,11 +1,11 @@
 {
-    "name": "Диалог с Жванецким",
-    "short_name": "Жванецкий",
+    "name": "Детектор эмоций",
+    "short_name": "Детектор",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Диалог с Жванецким - чат с ИИ",
+    "description": "Детектор эмоций",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
