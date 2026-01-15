@@ -195,8 +195,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // Парсим ответ
       final parsed = _parseResponse(response);
       final topic = parsed['topic'] as String?;
-      final body = parsed['body'] as String;
+      String body = parsed['body'] as String;
       final emotion = parsed['emotion'] as Emotion?;
+      
+      // Убираем "QUESTION:" из начала текста, если оно есть
+      body = body.replaceFirst(RegExp(r'^QUESTION:\s*', caseSensitive: false), '').trim();
+      
+      // Если body не распарсился (новый формат без topic:body:emotion:), используем весь ответ
+      if (body.isEmpty || body == response) {
+        body = response;
+        // Убираем "QUESTION:" из начала, если есть
+        body = body.replaceFirst(RegExp(r'^QUESTION:\s*', caseSensitive: false), '').trim();
+      }
 
       // Отладочный вывод (можно убрать в production)
       print('=== PARSING DEBUG ===');

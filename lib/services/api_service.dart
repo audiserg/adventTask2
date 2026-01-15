@@ -25,7 +25,7 @@ class ApiService {
             body: jsonEncode({'messages': messagesJson}),
           )
           .timeout(
-            const Duration(seconds: 30),
+            const Duration(seconds: 60),
             onTimeout: () {
               throw Exception('Request timeout');
             },

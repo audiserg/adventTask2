@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../models/message.dart';
 
 class ChatMessageWidget extends StatelessWidget {
@@ -33,41 +34,40 @@ class ChatMessageWidget extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Цветная полоска и смайлик для AI сообщений
-              // Показываем всегда для AI сообщений, даже если emotion null (для отладки)
-              if (isAiMessage) ...[
-                Container(
-                  width: 4,
-                  decoration: BoxDecoration(
-                    color: hasEmotion 
-                        ? _getEmotionColor(message.emotion!)
-                        : Colors.grey, // Серый цвет для отладки, если emotion null
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      bottomLeft: Radius.circular(18),
-                    ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Цветная полоска и смайлик для AI сообщений
+            // Показываем всегда для AI сообщений, даже если emotion null (для отладки)
+            if (isAiMessage) ...[
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: hasEmotion 
+                      ? _getEmotionColor(message.emotion!)
+                      : Colors.grey, // Серый цвет для отладки, если emotion null
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(18),
+                    bottomLeft: Radius.circular(18),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    hasEmotion 
-                        ? _getEmotionEmoji(message.emotion!)
-                        : '❓', // Вопросительный знак для отладки
-                    style: const TextStyle(fontSize: 24),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  hasEmotion 
+                      ? _getEmotionEmoji(message.emotion!)
+                      : '❓', // Вопросительный знак для отладки
+                  style: const TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 8),
-              ],
-              // Основной контейнер с сообщением
-              Flexible(
-                child: Container(
+              ),
+              const SizedBox(width: 8),
+            ],
+            // Основной контейнер с сообщением
+            Flexible(
+              child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: message.isUser
@@ -79,16 +79,88 @@ class ChatMessageWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        // Для AI сообщений показываем только body (распарсенное), для пользователя - text
-                        message.isUser 
+                      MarkdownBody(
+                        data: message.isUser 
                             ? message.text 
                             : (message.body ?? 'Ответ получен, но не удалось распарсить формат'),
-                        style: TextStyle(
-                          color: message.isUser
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 16,
+                        styleSheet: MarkdownStyleSheet(
+                          p: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                          ),
+                          h1: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          h2: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          h3: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          listBullet: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                          ),
+                          code: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 14,
+                            fontFamily: 'monospace',
+                            backgroundColor: message.isUser
+                                ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                                : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                          ),
+                          codeblockDecoration: BoxDecoration(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+                                : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          blockquote: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)
+                                : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.8),
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          strong: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          em: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          a: TextStyle(
+                            color: message.isUser
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.primary,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -124,7 +196,6 @@ class ChatMessageWidget extends StatelessWidget {
               ),
             ],
           ),
-        ),
       ),
     );
   }

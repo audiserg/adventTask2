@@ -37,6 +37,7 @@ dependencies:
   http: ^1.2.0
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
+  flutter_markdown: ^0.6.18
 
 dev_dependencies:
   flutter_test:
