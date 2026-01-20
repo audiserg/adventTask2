@@ -6,6 +6,7 @@ import 'bloc/chat_event.dart';
 import 'models/message.dart';
 import 'widgets/chat_message.dart';
 import 'widgets/chat_input.dart';
+import 'widgets/settings_panel.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,8 +42,25 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  String _systemPrompt = '';
+  double _temperature = 0.7;
+
+  void _onSettingsChanged(String systemPrompt, double temperature) {
+    setState(() {
+      _systemPrompt = systemPrompt;
+      _temperature = temperature;
+    });
+    // Обновляем настройки в ChatBloc
+    context.read<ChatBloc>().updateSettings(systemPrompt, temperature);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +102,11 @@ class ChatScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          SettingsPanel(
+            initialSystemPrompt: _systemPrompt,
+            initialTemperature: _temperature,
+            onSettingsChanged: _onSettingsChanged,
+          ),
           Expanded(
             child: BlocBuilder<ChatBloc, ChatState>(
               builder: (context, state) {

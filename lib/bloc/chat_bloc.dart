@@ -6,12 +6,19 @@ import 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ApiService _apiService;
+  String _systemPrompt = '';
+  double _temperature = 0.7;
 
   ChatBloc({ApiService? apiService})
       : _apiService = apiService ?? ApiService(),
         super(const ChatInitial()) {
     on<SendMessage>(_onSendMessage);
     on<ClearChat>(_onClearChat);
+  }
+
+  void updateSettings(String systemPrompt, double temperature) {
+    _systemPrompt = systemPrompt;
+    _temperature = temperature;
   }
 
   // Парсинг ответа в формате topic:<Тема>: body:<Ответ>: emotion:<Цвет>:
@@ -189,8 +196,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(ChatLoading(updatedMessages, currentTopic: currentTopic));
 
     try {
-      // Отправляем запрос к API
-      final response = await _apiService.sendMessage(updatedMessages);
+      // Отправляем запрос к API с настройками
+      final response = await _apiService.sendMessage(
+        updatedMessages,
+        systemPrompt: _systemPrompt.isNotEmpty ? _systemPrompt : null,
+        temperature: _temperature,
+      );
 
       // Парсим ответ
       final parsed = _parseResponse(response);
